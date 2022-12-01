@@ -1,21 +1,22 @@
 from sqlalchemy import Column, Integer, String, VARCHAR
 from sqlalchemy import ForeignKey
-from app.db.base import Base
+from bot.db.base import Base
 
 
 class BaseModel(Base):
     __abstract__ = True
 
-    id = Column(Integer, primary_key=True, unique=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
 
 
 class User(BaseModel):
     __tablename__ = "users"
 
     nickname = Column(VARCHAR(255), unique=True)
-    first_name = Column(VARCHAR(255), nullable=False)
-    second_name = Column(VARCHAR(255), nullable=False)
+    fullname = Column(VARCHAR(255), nullable=False)
+    telegram_id = Column(Integer, unique=True)
     address = Column(String)
+    phone_number = Column(VARCHAR(255))
 
 
 class TypeOfProducts(BaseModel):
