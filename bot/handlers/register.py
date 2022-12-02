@@ -1,5 +1,5 @@
 from aiogram import types, Router
-from aiogram.filters import Command
+from aiogram.filters import Text
 from aiogram.fsm.context import FSMContext
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,8 +12,8 @@ from bot.handlers.states import Registration
 router = Router()
 
 
-@router.message(Command(commands=["register"]))
-async def cmd_register(message:types.Message, state:FSMContext, session: AsyncSession) -> None:
+@router.message(Text(text=['Зарегистрироваться', '/register'])) # ), Command(commands=["register"])
+async def cmd_register(message:types.Message, state: FSMContext, session: AsyncSession) -> None:
     if await is_registered(message.from_user.id, session):
         await message.answer('Вы уже зареганы)')
         await state.clear()
@@ -47,20 +47,20 @@ async def setting_address(message: types.Message, state: FSMContext) -> None:
     await message.answer(
         f"Супер, теперь последний шаг, номер телефона? (обещаю не звонить по путякам)"
     )
-    await state.set_state(Registration.set_phonenumber)
+    await state.set_state(Registration.set_phone_number)
 
 
-@router.message(Registration.set_phonenumber)
-async def setting_phonenumber(message: types.Message, state: FSMContext) -> None:
-    await state.update_data(phonenumber=message.text)
+@router.message(Registration.set_phone_number)
+async def setting_phone_number(message: types.Message, state: FSMContext) -> None:
+    await state.update_data(phone_number=message.text)
     user_data = await state.get_data()
     await message.answer(
-        f"Вы ввели данные: \n{user_data['nickname']} \n{user_data['fullname']} \n{user_data['address']} \n{user_data['phonenumber']} \nВерно?"
+        f"Вы ввели данные: \n{user_data['nickname']} \n{user_data['fullname']} \n{user_data['address']} \n{user_data['phone_number']} \nВерно?"
     )
-    await state.set_state(Registration.cofirming)
+    await state.set_state(Registration.confirming)
 
 
-@router.message(Registration.cofirming)
+@router.message(Registration.confirming)
 async def registration_confirming(message: types.Message, state: FSMContext, session: AsyncSession) -> None:
     user_data = await state.get_data()
     if message.text.lower() == 'да':
@@ -68,7 +68,7 @@ async def registration_confirming(message: types.Message, state: FSMContext, ses
             user = User()
             user.fullname = user_data['fullname']
             user.address = user_data['address']
-            user.phone_number = user_data['phonenumber']
+            user.phone_number = user_data['phone_number']
             user.nickname = user_data['nickname']
             user.telegram_id = message.from_user.id
             await register_user(session, user)

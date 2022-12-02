@@ -1,5 +1,8 @@
-from sqlalchemy import Column, Integer, String, VARCHAR
+import datetime
+
+from sqlalchemy import Column, Integer, String, VARCHAR, DateTime
 from sqlalchemy import ForeignKey
+from sqlalchemy.sql import func
 from bot.db.base import Base
 
 
@@ -52,3 +55,16 @@ class ProductImage(BaseModel):
 
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False, index=True)
     image_url = Column(VARCHAR(255), nullable=False)
+
+class Cart(BaseModel):
+    __tablename__ = 'carts'
+
+    order_id = Column(Integer, ForeignKey('orders.id'), nullable=False, index=True)
+    position_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+    size = Column(Integer)
+    amount = Column(Integer)
+
+class Order(BaseModel):
+    __tablename__ = 'orders'
+
+    ordered_at = Column(DateTime(timezone=True), server_default=func.now())
